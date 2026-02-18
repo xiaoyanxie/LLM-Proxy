@@ -48,5 +48,3 @@ openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 -nodes \
 
 ## Compatibility Notes
 - Python 3.12 is recommended.
-- Flask `2.2.x` is not compatible with Python `3.14`.
-- OpenSSL 3 may emit deprecation warnings during C compilation; current build remains functional.
