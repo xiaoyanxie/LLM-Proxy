@@ -193,6 +193,8 @@ int main(int argc, char *argv[])
 
     uint16_t port = (uint16_t)atoi(argv[1]);
 
+    fprintf(stderr, "proxy start at 5001\n");
+
     signal(SIGPIPE, SIG_IGN);
 
     if (ssl_global_init(argv[2], argv[3]) != 0) {
