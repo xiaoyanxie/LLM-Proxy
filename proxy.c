@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 
     uint16_t port = (uint16_t)atoi(argv[1]);
 
-    fprintf(stderr, "proxy start at 5001\n");
+    fprintf(stderr, "proxy start at %u\n", port);
 
     signal(SIGPIPE, SIG_IGN);
 

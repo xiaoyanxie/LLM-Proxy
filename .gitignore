@@ -13,3 +13,5 @@ proxy
 
 # local env
 .env
+.venv/
+.venv*/
