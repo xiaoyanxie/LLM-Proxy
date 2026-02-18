@@ -1,0 +1,15 @@
+__pycache__
+*.o
+*.out
+proxyCrts
+.vscode
+node_modules
+src/llm-server/config.json
+web_static/*
+proxy
+# C build artifacts
+*.o
+proxy
+
+# local env
+.env

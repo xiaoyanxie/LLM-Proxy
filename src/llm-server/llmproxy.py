@@ -1,0 +1,193 @@
+import json
+import os
+import requests
+
+def _load_config():
+    cfg_path = os.path.join(os.path.dirname(__file__), "config.json")
+    try:
+        with open(cfg_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+_cfg = _load_config()
+
+end_point = os.getenv('llm_server_endPoint') or _cfg.get('endPoint')
+api_key   = os.getenv('llm_server_apiKey') or _cfg.get('apiKey')
+
+def retrieve(
+    query: str,
+    session_id: str,
+    rag_threshold: float,
+    rag_k: int
+    ):
+
+    headers = {
+        'x-api-key': api_key,
+        'request_type': 'retrieve'
+    }
+
+    request = {
+        'query': query,
+        'session_id': session_id,
+        'rag_threshold': rag_threshold,
+        'rag_k': rag_k
+    }
+
+
+    clean_request = {k: v for k, v in request.items() if v is not None}
+
+    msg = None
+
+    try:
+        response = requests.post(end_point, headers=headers, json=clean_request)
+
+        if response.status_code == 200:
+            msg = json.loads(response.text)
+        else:
+            msg = f"Error: Received response code {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        msg = f"An error occurred: {e}"
+    return msg  
+
+def model_info():
+
+    headers = {
+        'x-api-key': api_key,
+        'request_type': 'model_info'
+    }
+
+    msg = None
+
+    try:
+        response = requests.post(end_point, headers=headers, json={})
+
+        if response.status_code == 200:
+            msg = json.loads(response.text)
+
+        else:
+            msg = f"Error: Received response code {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        msg = f"An error occurred: {e}"
+    return msg  
+
+
+def generate(
+	model: str,
+	system: str,
+	query: str,
+	temperature: float | None = None,
+	lastk: int | None = None,
+	session_id: str | None = None,
+    rag_threshold: float | None = 0.5,
+    rag_usage: bool | None = False,
+    rag_k: int | None = 0
+	):
+	
+
+    headers = {
+        'x-api-key': api_key,
+        'request_type': 'call'
+    }
+
+    request = {
+        'model': model,
+        'system': system,
+        'query': query,
+        'temperature': temperature,
+        'lastk': lastk,
+        'session_id': session_id,
+        'rag_threshold': rag_threshold,
+        'rag_usage': rag_usage,
+        'rag_k': rag_k
+    }
+
+    clean_request = {k: v for k, v in request.items() if v is not None}
+
+
+
+    msg = None
+
+    try:
+        response = requests.post(end_point, headers=headers, json=clean_request)
+
+        if response.status_code == 200:
+            res = json.loads(response.text)
+            msg = {'response':res['result'],'rag_context':res['rag_context']}
+        else:
+            msg = f"Error: Received response code {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        msg = f"An error occurred: {e}"
+    return msg	
+
+
+
+def upload(multipart_form_data):
+
+    headers = {
+        'x-api-key': api_key,
+        'request_type': 'add'
+    }
+
+    msg = None
+    try:
+        response = requests.post(end_point, headers=headers, files=multipart_form_data)
+        
+        if response.status_code == 200:
+            msg = "Successfully uploaded. It may take a short while for the document to be added to your context"
+        else:
+            msg = f"Error: Received response code {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        msg = f"An error occurred: {e}"
+    
+    return msg
+
+
+def pdf_upload(
+    path: str,    
+    strategy: str | None = None,
+    description: str | None = None,
+    session_id: str | None = None
+    ):
+    
+    params = {
+        'description': description,
+        'session_id': session_id,
+        'strategy': strategy
+    }
+
+
+    clean_params = {k: v for k, v in params.items() if v is not None}
+
+    multipart_form_data = {
+        'params': (None, json.dumps(clean_params), 'application/json'),
+        'file': (None, open(path, 'rb'), "application/pdf")
+    }
+
+    response = upload(multipart_form_data)
+    return response
+
+def text_upload(
+    text: str,    
+    strategy: str | None = None,
+    description: str | None = None,
+    session_id: str | None = None
+    ):
+    
+    params = {
+        'description': description,
+        'session_id': session_id,
+        'strategy': strategy
+    }
+
+
+    clean_params = {k: v for k, v in params.items() if v is not None}
+
+    multipart_form_data = {
+        'params': (None, json.dumps(clean_params), 'application/json'),
+        'text': (None, text, "application/text")
+    }
+
+
+    response = upload(multipart_form_data)
+    return response

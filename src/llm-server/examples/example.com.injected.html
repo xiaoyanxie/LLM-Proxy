@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head><title>Example Domain</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.<p><a href="https://iana.org/domains/example">Learn more</a></div>
+<div id="llm-summary-box"
+     style="
+       position: fixed;
+       left: 0;
+       right: 0;
+       bottom: 0;
+       z-index: 999999;
+       box-sizing: border-box;
+       max-height: 40vh;
+       overflow-y: auto;
+       background: rgba(255, 255, 255, 0.97);
+       border-top: 1px solid #ccc;
+       padding: 0.75em 1em;
+       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       font-size: 14px;
+       box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+     ">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4em;">
+    <strong>AI Summary (experimental)</strong>
+    <button type="button"
+            onclick="document.getElementById('llm-summary-box').style.display='none';"
+            style="
+              border: none;
+              background: transparent;
+              font-size: 16px;
+              cursor: pointer;
+              line-height: 1;
+            ">&times;</button>
+  </div>
+  <div id="llm-summary-text">Loading summary…</div>
+</div>
+
+<script>
+(function() {
+  var box = document.getElementById('llm-summary-text');
+  if (!box) return;
+
+  fetch('http://127.0.0.1:5000/llm?id=7c893d9a44ee477e8fc9cf58db18fe77')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.summary) {
+        box.textContent = data.summary;
+      } else if (data.error) {
+        box.textContent = 'Error: ' + data.error;
+      } else {
+        box.textContent = 'No summary available.';
+      }
+    })
+    .catch(function(err) {
+      box.textContent = 'Failed to load summary.';
+      console.error(err);
+    });
+})();
+</script>
+</body></html>
